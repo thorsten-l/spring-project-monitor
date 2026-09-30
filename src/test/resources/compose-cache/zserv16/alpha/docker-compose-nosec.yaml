@@ -1,0 +1,4 @@
+services:
+  alpha:
+    image: bellsoft/liberica-openjdk-alpine:21
+    command: ["java", "-jar", "/alpha-app.jar"]

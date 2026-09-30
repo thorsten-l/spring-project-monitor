@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>4.1.1</version>
+    <relativePath/>
+  </parent>
+  <groupId>l9g.webapp</groupId>
+  <artifactId>alpha-app</artifactId>
+  <version>1.0.0</version>
+  <properties>
+    <java.version>25</java.version>
+  </properties>
+</project>

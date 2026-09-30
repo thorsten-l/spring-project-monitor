@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="de">
+  <head th:replace="~{fragments/head :: head('Spring Project Monitor')}"></head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+      <div class="container-fluid">
+        <span class="navbar-brand"><i class="fa-solid fa-leaf text-success me-2"></i>Spring Project Monitor</span>
+        <div class="d-flex align-items-center gap-3">
+          <span class="navbar-text small">
+            <span th:text="${#lists.size(projects)}">0</span> Projekte
+            <th:block th:if="${status.finished != null}">
+              · Scan <span th:text="${#temporals.format(status.finished, 'dd.MM.yyyy HH:mm:ss')}"></span>
+              (<span th:text="${status.seconds}"></span> s)
+            </th:block>
+          </span>
+          <form th:action="@{/rescan}" method="post" class="m-0">
+            <button type="submit" class="btn btn-sm btn-outline-light" th:disabled="${status.running}">
+              <i class="fa-solid fa-arrows-rotate me-1" th:classappend="${status.running} ? 'fa-spin'"></i>neu scannen
+            </button>
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container-fluid">
+      <div th:if="${status.waitingForKey != null}" class="alert alert-warning fs-5">
+        <i class="fa-solid fa-fingerprint fa-beat me-2"></i>
+        Bitte den Security-Key für <strong th:text="${status.waitingForKey.sshTarget()}">host</strong>
+        bestätigen (berühren bzw. Finger auflegen) –
+        Schlüssel <code th:text="${status.waitingForKey.securityKey()}">~/.ssh/id_ed25519_sk</code>
+      </div>
+      <div th:if="${status.running}" class="alert alert-info scan-running">
+        <i class="fa-solid fa-spinner fa-spin me-2"></i>
+        Scan von <code th:text="${scanRoot}"></code> läuft … die Seite aktualisiert sich automatisch.
+      </div>
+      <div th:unless="${#lists.isEmpty(securityKeyHosts)}" class="small text-secondary mb-2">
+        <i class="fa-solid fa-key me-1"></i>
+        Nur bei „neu scannen“ abgefragt (Security-Key nötig):
+        <span th:each="h, iter : ${securityKeyHosts}"><code th:text="${h.sshTarget()}"></code><span th:unless="${iter.last}">, </span></span>
+      </div>
+      <div th:if="${status.error != null}" class="alert alert-danger">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>
+        Scan fehlgeschlagen: <code th:text="${status.error}"></code>
+      </div>
+      <div th:if="${#lists.isEmpty(projects) and !status.running}" class="alert alert-warning">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+        Keine Projekte gefunden unter <code th:text="${scanRoot}"></code>
+      </div>
+
+      <div th:unless="${#lists.isEmpty(projects)}" class="table-responsive">
+        <table class="table table-striped table-hover align-middle project-table">
+          <thead class="table-dark">
+            <tr>
+              <th th:each="c : ${columns}" scope="col"
+                  th:attr="aria-sort=${sort == c.key} ? (${dir} == 'asc' ? 'ascending' : 'descending') : 'none'">
+                <div class="d-flex align-items-center justify-content-between gap-2">
+                  <span th:text="${c.label}">Spalte</span>
+                  <span class="sort-arrows text-nowrap">
+                    <a th:href="@{/(sort=${c.key},dir='asc')}"
+                       th:classappend="${sort == c.key and dir == 'asc'} ? 'active'"
+                       title="aufsteigend sortieren" aria-label="aufsteigend sortieren">
+                      <i class="fa-solid fa-arrow-up"></i>
+                    </a>
+                    <a th:href="@{/(sort=${c.key},dir='desc')}"
+                       th:classappend="${sort == c.key and dir == 'desc'} ? 'active'"
+                       title="absteigend sortieren" aria-label="absteigend sortieren">
+                      <i class="fa-solid fa-arrow-down"></i>
+                    </a>
+                  </span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="p : ${projects}" class="project-row"
+                th:data-href="@{/project/{id}(id=${p.id})}">
+              <td th:text="${p.get('groupId')}">groupId</td>
+              <td>
+                <a th:href="@{/project/{id}(id=${p.id})}" target="_blank" rel="noopener"
+                   class="fw-semibold text-decoration-none" th:text="${p.get('artifactId')}">artifactId</a>
+              </td>
+              <td th:text="${p.get('project_version')}">1.0.0</td>
+              <td><span class="badge" th:classappend="${p.springBootBadge}"
+                        th:text="${p.get('spring_boot_parent_version')}">4.1.1</span></td>
+              <td><span class="badge" th:classappend="${p.jdkBadge}"
+                        th:text="${p.get('jdk_version')}">25</span></td>
+              <td class="text-nowrap" th:text="${p.get('pom_last_modified')}">2026-01-01 00:00:00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/app.js}"></script>
+  </body>
+</html>

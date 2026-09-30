@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: spring-project-monitor
+  thymeleaf:
+    cache: false
+  main:
+    banner-mode: console
+  profiles:
+    active: default
+  banner:
+    location: classpath:banner.txt
+  config:
+    import: optional:file:data/config.yaml
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 8080
+
+app:
+  # Verzeichnis, unter dem beim Start nach Spring-Boot-POMs gesucht wird.
+  # Default: $HOME (Fallback: Java-Property user.home). Überschreibbar z. B. mit
+  # --app.scan-root=... oder der Umgebungsvariablen APP_SCANROOT.
+  scan-root: "${HOME:${user.home}}"
+  # Reguläre Ausdrücke auf Verzeichnispfade (mit abschließendem "/"); passende
+  # Verzeichnisse werden beim Scan nicht betreten, z. B. "/00Archive/" oder
+  # "/l9g-lessons/". Test-Fixtures (auch die dieses Projekts) sind keine echten Projekte.
+  scan-excludes:
+    # macOS: ~/Library (u. a. CloudStorage/Nextcloud, iCloud) ist riesig und enthält keine Projekte
+    - "^${HOME:${user.home}}/Library/"
+    - "/src/test/resources/"
+    # Maven-Archetype-Vorlagen (Velocity), keine echten Projekte
+    - "/archetype-resources/"
+  # true = beim Scan "git fetch" ausführen (Netzwerkzugriff, dauert länger)
+  git-fetch: false
+
+  docker:
+    # Format: [user@]host[:pfad][?key=<datei>]; "." bzw. kein Pfad = Home-Verzeichnis.
+    # Es werden NUR *compose*.yml/yaml geholt, niemals .env oder Volumes.
+    # ?key= kennzeichnet einen Host mit Hardware-Security-Key (FIDO, *_sk): ssh nutzt nur
+    # diese Identität, und der Host wird nur bei "neu scannen" abgefragt, nicht beim Start.
+    # Beispiel: app@useradm.ostfalia.de:.?key=~/.ssh/id_ed25519_sk
+    hosts:
+      - user@sample-host:.
+    # Lokale Kopie der compose-Dateien (compose-cache/<host>/...). Ist ein Host
+    # nicht erreichbar, wird der vorhandene Stand weiterverwendet.
+    compose-cache: ./data/compose-cache
+    # false = nicht per SSH holen, nur den Cache lesen
+    fetch: true
+    # true = Hosts mit ?key= auch beim automatischen Scan nach dem Start abfragen
+    # (der Security-Key muss dann gesteckt sein und bestätigt werden), sonst nur bei "neu scannen"
+    security-key-on-startup: false
+    # ssh-Programm. Apples /usr/bin/ssh kann FIDO-Keys (*_sk) nicht selbst nutzen und
+    # meldet dann sofort "Permission denied (publickey)", daher Homebrew-OpenSSH.
+    # Leer = /opt/homebrew/bin/ssh bzw. /usr/local/bin/ssh, falls vorhanden, sonst "ssh" aus dem PATH.
+    ssh: /opt/homebrew/bin/ssh

@@ -1,0 +1,8 @@
+services:
+  alpha:
+    image: bellsoft/liberica-openjdk-alpine:21
+    command: ["java", "-jar", "/alpha-app.jar"]
+    volumes:
+      - ./alpha-app.jar:/alpha-app.jar:ro
+  traefik:
+    image: traefik:3.6

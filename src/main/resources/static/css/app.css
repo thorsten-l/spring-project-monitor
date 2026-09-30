@@ -1,0 +1,24 @@
+.project-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.project-row {
+  cursor: pointer;
+}
+
+.sort-arrows a {
+  color: rgba(255, 255, 255, 0.4);
+  padding: 0 0.1rem;
+  text-decoration: none;
+}
+
+.sort-arrows a:hover {
+  color: #fff;
+}
+
+.sort-arrows a.active {
+  color: var(--bs-warning);
+}

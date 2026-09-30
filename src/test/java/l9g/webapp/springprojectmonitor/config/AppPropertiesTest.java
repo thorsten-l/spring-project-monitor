@@ -1,0 +1,68 @@
+/*
+ * Copyright 2026 Thorsten Ludewig (t.ludewig@gmail.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package l9g.webapp.springprojectmonitor.config;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class AppPropertiesTest
+{
+
+  @Test
+  void securityKeyHostsOnlyOnManualScanByDefault()
+  {
+    AppProperties.Docker docker = new AppProperties.Docker(List.of(), "cache", true, false, null);
+
+    assertThat(docker.includeSecurityKeyHosts(false)).isFalse();
+    assertThat(docker.includeSecurityKeyHosts(true)).isTrue();
+  }
+
+  @Test
+  void configuredSshWinsOverAutoDetection()
+  {
+    assertThat(new AppProperties.Docker(List.of(), "cache", true, false, "/custom/ssh").sshExecutable())
+      .isEqualTo("/custom/ssh");
+  }
+
+  @Test
+  void autoDetectionPrefersHomebrewOpenSsh()
+  {
+    String ssh = new AppProperties.Docker(List.of(), "cache", true, false, null).sshExecutable();
+
+    if (Files.isExecutable(Path.of("/opt/homebrew/bin/ssh")))
+    {
+      assertThat(ssh).isEqualTo("/opt/homebrew/bin/ssh");
+    }
+    else
+    {
+      assertThat(ssh).isIn("/usr/local/bin/ssh", "ssh");
+    }
+  }
+
+  @Test
+  void securityKeyOnStartupIncludesThemAlways()
+  {
+    AppProperties.Docker docker = new AppProperties.Docker(List.of(), "cache", true, true, null);
+
+    assertThat(docker.includeSecurityKeyHosts(false)).isTrue();
+    assertThat(docker.includeSecurityKeyHosts(true)).isTrue();
+  }
+
+}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="de">
+  <head th:replace="~{fragments/head :: head(${project.get('artifactId')} + ' – Spring Project Monitor')}"></head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+      <div class="container-fluid">
+        <span class="navbar-brand">
+          <i class="fa-solid fa-cube text-success me-2"></i>
+          <span th:text="${project.get('artifactId')}">artifactId</span>
+          <small class="text-secondary ms-2" th:text="${project.get('groupId')}">groupId</small>
+        </span>
+        <span class="d-flex gap-2">
+          <span class="badge" th:classappend="${project.springBootBadge}">
+            <i class="fa-solid fa-leaf me-1"></i>Spring Boot <span th:text="${project.get('spring_boot_parent_version')}"></span>
+          </span>
+          <span class="badge" th:classappend="${project.jdkBadge}">
+            <i class="fa-brands fa-java me-1"></i>JDK <span th:text="${project.get('jdk_version')}"></span>
+          </span>
+        </span>
+      </div>
+    </nav>
+
+    <main class="container-fluid">
+      <div class="row row-cols-1 row-cols-lg-2 row-cols-xxl-3 g-4">
+        <div class="col" th:each="tile : ${tiles}">
+          <div class="card h-100 shadow-sm">
+            <div class="card-header fw-semibold">
+              <i th:class="${tile.icon} + ' me-2 text-secondary'"></i><span th:text="${tile.title}">Kachel</span>
+            </div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <th:block th:each="f : ${tile.fields}">
+                  <dt class="col-sm-4 text-secondary fw-normal" th:text="${f.label}">Label</dt>
+                  <dd class="col-sm-8 text-break">
+                    <span th:if="${f.empty}" class="text-body-tertiary">–</span>
+                    <th:block th:unless="${f.empty}" th:switch="${f.kind.name()}">
+                      <code th:case="'CODE'" th:text="${f.value}"></code>
+                      <th:block th:case="'LINK'">
+                        <a th:if="${#strings.startsWith(f.value, 'http')}" th:href="${f.value}"
+                           target="_blank" rel="noopener" th:text="${f.value}"></a>
+                        <code th:unless="${#strings.startsWith(f.value, 'http')}" th:text="${f.value}"></code>
+                      </th:block>
+                      <th:block th:case="'YESNO'">
+                        <span th:if="${f.value == 'ja'}" class="badge text-bg-warning">
+                          <i class="fa-solid fa-triangle-exclamation me-1"></i>ja</span>
+                        <span th:if="${f.value == 'nein'}" class="badge text-bg-success">
+                          <i class="fa-solid fa-check me-1"></i>nein</span>
+                        <span th:unless="${f.value == 'ja' or f.value == 'nein'}" class="badge text-bg-secondary"
+                              th:text="${f.value}"></span>
+                      </th:block>
+                      <ul th:case="'LIST'" class="list-unstyled mb-0">
+                        <li th:each="item : ${f.items}"><code th:text="${item}"></code></li>
+                      </ul>
+                      <th:block th:case="'BADGES'">
+                        <span th:each="item : ${f.items}" class="badge text-bg-info me-1">
+                          <i class="fa-solid fa-server me-1"></i><span th:text="${item}"></span>
+                        </span>
+                      </th:block>
+                      <span th:case="*" th:text="${f.value}"></span>
+                    </th:block>
+                  </dd>
+                </th:block>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.bundle.min.js}"></script>
+  </body>
+</html>
