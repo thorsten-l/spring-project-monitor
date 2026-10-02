@@ -8,6 +8,7 @@ services:
     volumes:
       - ./target/spring-project-monitor.jar:/spring-project-monitor.jar:ro
       - ./data:/data:ro
+      - /Users:/Users:ro
     environment:
       - TZ=Europe/Berlin
     ports:
