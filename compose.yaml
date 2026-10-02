@@ -1,9 +1,3 @@
-# l9g-cardinfo/docker/compose.yaml
-# Spring Boot per Volume-Mount, kein Dockerfile.
-# jar + ../data read-only reingemountet; Health auf Management-Port 9000.
-#
-# vorher das aktuelle jar bereitstellen:
-#   ( cd .. && mvn clean package ) && cp ../target/l9g-cardinfo.jar .
 services:
   springboot-monitor:
     image: bellsoft/liberica-openjre-debian:25
