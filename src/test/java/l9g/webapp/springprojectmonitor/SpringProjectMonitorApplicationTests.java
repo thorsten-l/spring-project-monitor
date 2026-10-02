@@ -31,6 +31,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -138,7 +139,10 @@ class SpringProjectMonitorApplicationTests
       .andExpect(content().string(containsString("table-striped")))
       .andExpect(content().string(containsString("alpha-app")))
       .andExpect(content().string(containsString("fa-arrow-up")))
-      .andExpect(content().string(containsString("neu scannen")));
+      .andExpect(content().string(containsString("neu scannen")))
+      // Checkbox "fetch docker" vorhanden und standardmäßig nicht angehakt
+      .andExpect(content().string(containsString("name=\"fetchDocker\" value=\"true\"")))
+      .andExpect(content().string(not(containsString("checked"))));
   }
 
   @Test

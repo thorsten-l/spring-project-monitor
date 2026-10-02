@@ -52,4 +52,12 @@ class DockerInspectorTest
     assertThat(DockerInspector.sshCommand(A, "ssh")).doesNotContain("-i", "IdentitiesOnly=yes");
   }
 
+  @Test
+  void sshOverridesInteractiveSettingsFromSshConfig()
+  {
+    // ~/.ssh/config mit RemoteCommand bzw. RequestTTY yes darf den Abruf nicht stören
+    assertThat(DockerInspector.sshCommand(A, "ssh"))
+      .containsSubsequence("ssh", "-T", "-o", "RequestTTY=no", "-o", "RemoteCommand=none", "root@zserv15");
+  }
+
 }

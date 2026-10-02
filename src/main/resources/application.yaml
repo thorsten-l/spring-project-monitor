@@ -46,7 +46,8 @@ app:
     # Lokale Kopie der compose-Dateien (compose-cache/<host>/...). Ist ein Host
     # nicht erreichbar, wird der vorhandene Stand weiterverwendet.
     compose-cache: ./data/compose-cache
-    # false = nicht per SSH holen, nur den Cache lesen
+    # false = nicht per SSH holen, nur den Cache lesen. Gilt für den automatischen Scan
+    # beim Start; bei "neu scannen" entscheidet die Checkbox "fetch docker" (Default aus).
     fetch: true
     # true = Hosts mit ?key= auch beim automatischen Scan nach dem Start abfragen
     # (der Security-Key muss dann gesteckt sein und bestätigt werden), sonst nur bei "neu scannen"

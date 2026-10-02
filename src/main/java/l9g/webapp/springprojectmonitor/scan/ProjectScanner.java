@@ -60,14 +60,15 @@ public class ProjectScanner
 
   public List<Project> scan() throws IOException, InterruptedException
   {
-    return scan(false, host -> {});
+    return scan(false, properties.docker().fetch(), host -> {});
   }
 
   /**
    * @param manual        true = vom Nutzer ausgelöst; nur dann werden Hosts mit Security-Key abgefragt
+   * @param fetchDocker   compose-Dateien per SSH holen (sonst nur Cache); überschreibt app.docker.fetch
    * @param waitingForKey Hinweis "bitte Security-Key bestätigen" (Host bzw. null danach)
    */
-  public List<Project> scan(boolean manual, Consumer<DockerHost> waitingForKey)
+  public List<Project> scan(boolean manual, boolean fetchDocker, Consumer<DockerHost> waitingForKey)
     throws IOException, InterruptedException
   {
     Path root = Path.of(properties.scanRoot()).toAbsolutePath().normalize();
@@ -82,7 +83,11 @@ public class ProjectScanner
     AppProperties.Docker dockerProperties = properties.docker();
     Path cache = Path.of(dockerProperties.composeCache()).toAbsolutePath().normalize();
     List<DockerHost> hosts = dockerProperties.targets();
-    if (dockerProperties.fetch())
+    if (!fetchDocker)
+    {
+      log.info("compose-Dateien nicht per SSH geholt, nur Cache");
+    }
+    else
     {
       List<DockerHost> toFetch = DockerInspector.fetchOrder(hosts, dockerProperties.includeSecurityKeyHosts(manual));
       hosts.stream()

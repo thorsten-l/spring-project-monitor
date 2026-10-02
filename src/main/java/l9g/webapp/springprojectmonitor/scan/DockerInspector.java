@@ -166,7 +166,7 @@ public class DockerInspector
         }
         else
         {
-          log.warn("{} nicht abrufbar, verwende vorhandenen Cache. ssh: {}", dockerHost, lastLine(sshErr));
+          log.warn("{} nicht abrufbar, verwende vorhandenen Cache. ssh: {}", dockerHost, errorLines(sshErr));
           deleteRecursively(tmp);
         }
       }
@@ -203,10 +203,17 @@ public class DockerInspector
   /**
    * ssh-Aufruf; bei Security-Key nur die angegebene Identität verwenden, damit ssh
    * nicht vorher alle Default-Schlüssel durchprobiert.
+   * <p>
+   * Einstellungen aus ~/.ssh/config, die einen nicht-interaktiven Aufruf mit eigenem
+   * Befehl stören, werden überschrieben (Kommandozeile hat Vorrang):
+   * {@code RemoteCommand} führt sonst zu "Cannot execute command-line and remote command.",
+   * {@code RequestTTY yes} würde den binären tar-Strom über ein Pseudo-Terminal verfälschen.
    */
   static List<String> sshCommand(DockerHost host, String ssh)
   {
-    List<String> command = new ArrayList<>(List.of(ssh, "-o", "BatchMode=yes", "-o", "ConnectTimeout=10"));
+    List<String> command = new ArrayList<>(List.of(ssh,
+      "-T", "-o", "RequestTTY=no", "-o", "RemoteCommand=none",
+      "-o", "BatchMode=yes", "-o", "ConnectTimeout=10"));
     if (host.needsSecurityKey())
     {
       command.addAll(List.of("-i", host.securityKeyFile(), "-o", "IdentitiesOnly=yes"));
@@ -228,12 +235,20 @@ public class DockerInspector
       .toList();
   }
 
-  private static String lastLine(Path file)
+  /**
+   * Alle ssh-Meldungen (z. B. "Confirm user presence ..." und "sign_and_send_pubkey: ..."
+   * vor "Permission denied"), höchstens die letzten 10 Zeilen.
+   */
+  private static String errorLines(Path file)
   {
     try
     {
-      List<String> lines = Files.readAllLines(file).stream().filter(l -> !l.isBlank()).toList();
-      return lines.isEmpty() ? "(keine Meldung, ggf. Timeout)" : lines.getLast().strip();
+      List<String> lines = Files.readAllLines(file).stream().filter(l -> !l.isBlank()).map(String::strip).toList();
+      if (lines.isEmpty())
+      {
+        return "(keine Meldung, ggf. Timeout)";
+      }
+      return String.join(" | ", lines.subList(Math.max(0, lines.size() - 10), lines.size()));
     }
     catch (IOException e)
     {

@@ -66,7 +66,7 @@ app:
 | `?key=<datei>` | Host braucht einen Security-Key: ssh nutzt nur diese Identität und wird nur bei „neu scannen“ abgefragt |
 | `app.docker.security-key-on-startup` | `true` = Security-Key-Hosts auch beim Start-Scan abfragen |
 | `app.docker.ssh` | ssh-Programm; leer = Homebrew-OpenSSH, falls vorhanden, sonst `ssh` |
-| `app.docker.fetch` | `false` = nicht per SSH holen, nur `app.docker.compose-cache` lesen |
+| `app.docker.fetch` | `false` = beim Start-Scan nicht per SSH holen, nur `app.docker.compose-cache` lesen. Bei „neu scannen“ entscheidet die Checkbox „fetch docker“ (Default aus) |
 | `app.docker.compose-cache` | lokale Kopie der compose-Dateien, Default `./data/compose-cache` |
 
 Jede Einstellung lässt sich auch per Kommandozeile (`--app.git-fetch=true`) oder

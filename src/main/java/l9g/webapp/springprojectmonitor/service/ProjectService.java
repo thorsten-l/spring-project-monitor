@@ -106,31 +106,33 @@ public class ProjectService
   @EventListener(ApplicationReadyEvent.class)
   public void onApplicationReady()
   {
-    startScan(false);
+    startScan(false, properties.docker().fetch());
   }
 
   /**
    * Startet einen Scan im Hintergrund; false, wenn bereits einer läuft.
    *
-   * @param manual true = vom Nutzer ausgelöst, dann auch Hosts mit Security-Key abfragen
+   * @param manual      true = vom Nutzer ausgelöst, dann auch Hosts mit Security-Key abfragen
+   * @param fetchDocker compose-Dateien per SSH holen; beim Start app.docker.fetch,
+   *                    bei "neu scannen" die Checkbox "fetch docker"
    */
-  public boolean startScan(boolean manual)
+  public boolean startScan(boolean manual, boolean fetchDocker)
   {
     if (!running.compareAndSet(false, true))
     {
       return false;
     }
     status = status.start();
-    Thread.ofVirtual().name("project-scan").start(() -> doScan(manual));
+    Thread.ofVirtual().name("project-scan").start(() -> doScan(manual, fetchDocker));
     return true;
   }
 
-  private void doScan(boolean manual)
+  private void doScan(boolean manual, boolean fetchDocker)
   {
     Instant start = Instant.now();
     try
     {
-      projects = scanner.scan(manual, host -> status = status.waitingFor(host));
+      projects = scanner.scan(manual, fetchDocker, host -> status = status.waitingFor(host));
       status = new ScanStatus(false, LocalDateTime.now(), Duration.between(start, Instant.now()), null, null);
       log.info("Scan abgeschlossen: {} Projekte in {} s", projects.size(), status.getSeconds());
     }

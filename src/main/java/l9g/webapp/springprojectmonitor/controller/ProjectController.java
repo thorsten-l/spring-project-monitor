@@ -70,9 +70,9 @@ public class ProjectController
   }
 
   @PostMapping("/rescan")
-  public String rescan()
+  public String rescan(@RequestParam(name = "fetchDocker", defaultValue = "false") boolean fetchDocker)
   {
-    projectService.startScan(true);
+    projectService.startScan(true, fetchDocker);
     return "redirect:/";
   }
 

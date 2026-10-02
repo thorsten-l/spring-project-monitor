@@ -13,7 +13,13 @@
               (<span th:text="${status.seconds}"></span> s)
             </th:block>
           </span>
-          <form th:action="@{/rescan}" method="post" class="m-0">
+          <form th:action="@{/rescan}" method="post" class="m-0 d-flex align-items-center gap-2">
+            <div class="form-check form-check-inline m-0 text-light small"
+                 title="compose-Dateien per SSH von den Docker-Hosts holen (sonst nur lokaler Cache)">
+              <input class="form-check-input" type="checkbox" id="fetchDocker" name="fetchDocker" value="true"
+                     th:disabled="${status.running}">
+              <label class="form-check-label" for="fetchDocker">fetch docker</label>
+            </div>
             <button type="submit" class="btn btn-sm btn-outline-light" th:disabled="${status.running}">
               <i class="fa-solid fa-arrows-rotate me-1" th:classappend="${status.running} ? 'fa-spin'"></i>neu scannen
             </button>
@@ -35,7 +41,7 @@
       </div>
       <div th:unless="${#lists.isEmpty(securityKeyHosts)}" class="small text-secondary mb-2">
         <i class="fa-solid fa-key me-1"></i>
-        Nur bei „neu scannen“ abgefragt (Security-Key nötig):
+        Nur bei „neu scannen“ mit „fetch docker“ abgefragt (Security-Key nötig):
         <span th:each="h, iter : ${securityKeyHosts}"><code th:text="${h.sshTarget()}"></code><span th:unless="${iter.last}">, </span></span>
       </div>
       <div th:if="${status.error != null}" class="alert alert-danger">

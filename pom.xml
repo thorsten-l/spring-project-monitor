@@ -11,7 +11,7 @@
   <groupId>l9g.webapp</groupId>
   <artifactId>spring-project-monitor</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>Spring Project Monitor</name>
+  <name>L9G Spring Project Monitor</name>
   <description>Übersicht der lokalen Spring-Boot-Projekte aus spring-boot-projects-by-access.csv</description>
 
   <licenses>
